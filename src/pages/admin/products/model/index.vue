@@ -320,7 +320,7 @@ const confirmEdit = (id) => {
 
         &.p-highlight {
           color: #ffffff;
-          background: #E28C3F;
+          background: #4338CA;
         }
 
         &:disabled {

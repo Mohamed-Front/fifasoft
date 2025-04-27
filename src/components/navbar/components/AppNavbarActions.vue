@@ -5,7 +5,7 @@
      <settings-dropdown class="app-navbar-actions__item" />
     <language-dropdown style="width: 100% !important;text-align: justify !important;padding-right: 15px;font-size: 17px !important; " class="app-navbar-actions__item" />
     <profile-dropdown class="app-navbar-actions__item app-navbar-actions__item--profile text-black">
-      <span>Admin</span>
+      <span>fifasoft</span>
 
     </profile-dropdown>
   </div>
@@ -21,9 +21,10 @@ import axios from "axios";
   import ColorDropdown from './dropdowns/ColorDropdown.vue'
   import * as PusherPushNotifications from "@pusher/push-notifications-web";
   import LocaleSelect from '../../LocaleSelect.vue'
+  const name =ref('')
   const x =ref(0)
   onMounted(() => {
-
+    name.value = localStorage.getItem('authUser')
 
 
 

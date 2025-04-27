@@ -336,7 +336,7 @@ const formatDate = (dateString) => {
 
         &.p-highlight {
           color: #ffffff;
-          background: #E28C3F;
+          background: #1976d2;
         }
 
         &:disabled {

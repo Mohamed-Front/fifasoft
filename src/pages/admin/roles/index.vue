@@ -14,32 +14,33 @@ const user = ref({
   name: '',
   permissions: []
 })
-const users = ref([])
 const roles = ref([])
-const updateDialog = ref(false)
-const productDialog = ref(false)
+const permissions = ref([])
 const deleteDialog = ref(false)
-const deleteProductsDialog = ref(false)
-const product = ref({})
-const selectedProducts = ref(null)
+const createDialog = ref(false)
+const updateDialog = ref(false)
+const selectedRoles = ref(null)
 const dt = ref(null)
 const filters = ref({})
 const submitted = ref(false)
-const delete_id = ref(Number)
+const deleteId = ref(null)
 const searchQuery = ref('')
+
+// Filter related variables
+const governorates = ref([])
+const statuses = ref([
+  { id: '0', name: 'Inactive' },
+  { id: '1', name: 'Active' }
+])
+const selectedGovernorate = ref(null)
+const selectedStatus = ref(null)
+const dateRange = ref(null)
 
 // Pagination variables
 const currentPage = ref(1)
 const totalRecords = ref(0)
 const rowsPerPage = ref(10)
 const totalPages = ref(0)
-const firstPageUrl = ref('')
-const lastPageUrl = ref('')
-const nextPageUrl = ref('')
-const prevPageUrl = ref('')
-const from = ref(0)
-const to = ref(0)
-const links = ref([])
 
 // Initialize filters
 const initFilters = () => {
@@ -48,30 +49,65 @@ const initFilters = () => {
   }
 }
 
-// Fetch roles data with pagination
+// Build filter payload
+const buildFilterPayload = () => {
+  const payload = {
+    search: searchQuery.value,
+    filters: []
+  }
+
+  // Add governorate filter if selected
+  if (selectedGovernorate.value) {
+    payload.filters.push({
+      id: 'governorate_id',
+      value: selectedGovernorate.value.id
+    })
+  }
+
+  // Add status filter if selected
+  if (selectedStatus.value) {
+    payload.filters.push({
+      id: 'status',
+      value: selectedStatus.value.id
+    })
+  }
+
+  // Add date range filter if selected
+  if (dateRange.value && dateRange.value.length === 2) {
+    const [startDate, endDate] = dateRange.value
+    payload.filters.push({
+      id: 'created_at',
+      value: startDate.toISOString().split('T')[0],
+      expression: 'GreaterThanOrEqual'
+    })
+    payload.filters.push({
+      id: 'created_at',
+      value: endDate.toISOString().split('T')[0],
+      expression: 'LessThanOrEqual'
+    })
+  }
+
+  return payload
+}
+
+// Fetch roles data with pagination and filters
 const fetchData = () => {
   loading.value = true
-  axios.get("/api/role", {
+  const filterPayload = buildFilterPayload()
+
+  axios.get("/api/roles", {
     params: {
       page: currentPage.value,
-      limit: rowsPerPage.value,
-      search: searchQuery.value
+      per_page: rowsPerPage.value,
+      ...filterPayload
     }
   }).then((res) => {
+    roles.value = res.data.data
+    totalRecords.value = res.data.meta.total
+    totalPages.value = res.data.meta.last_page
     loading.value = false
-    roles.value = res.data.data.data
-    totalRecords.value = res.data.data.total
-    totalPages.value = res.data.data.last_page
-    firstPageUrl.value = res.data.data.first_page_url
-    lastPageUrl.value = res.data.data.last_page_url
-    nextPageUrl.value = res.data.data.next_page_url
-    prevPageUrl.value = res.data.data.prev_page_url
-    from.value = res.data.data.from
-    to.value = res.data.data.to
-    links.value = res.data.data.links
   }).catch(error => {
     loading.value = false
-    console.error("Error fetching roles:", error)
     toast.add({
       severity: 'error',
       summary: 'Error',
@@ -79,98 +115,135 @@ const fetchData = () => {
       life: 3000
     })
   })
+}
 
-  // Fetch permissions separately
-  axios.get("/api/role/get/permissions").then((res) => {
-    users.value = res.data.permissions
+// Fetch governorates
+const fetchGovernorates = () => {
+  axios.get("/api/Lookup/CountryList").then((res) => {
+    governorates.value = res.data.data
+  }).catch(error => {
+    console.error("Error fetching governorates:", error)
+  })
+}
+
+// Fetch permissions
+const fetchPermissions = () => {
+  axios.get("/api/permissions").then((res) => {
+    permissions.value = res.data.data
   }).catch(error => {
     console.error("Error fetching permissions:", error)
   })
 }
 
+// Reset all filters
+const resetFilters = () => {
+  searchQuery.value = ''
+  selectedGovernorate.value = null
+  selectedStatus.value = null
+  dateRange.value = null
+  currentPage.value = 1
+  fetchData()
+}
+
 // Pagination functions
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    fetchData()
-  }
-}
-
-const changeRowsPerPage = (rows) => {
-  rowsPerPage.value = rows.value
-  currentPage.value = 1
+const onPageChange = (event) => {
+  currentPage.value = event.page + 1
+  rowsPerPage.value = event.rows
   fetchData()
 }
 
-// Search watcher
-watch(searchQuery, (newVal) => {
+// Watchers for filter changes
+watch([searchQuery, selectedGovernorate, selectedStatus, dateRange], () => {
   currentPage.value = 1
   fetchData()
-})
+}, { deep: true })
 
 // CRUD operations
 const openNew = () => {
-  router.push({ name: 'roles-create' })
+  user.value = { name: '', permissions: [] }
+  submitted.value = false
+  createDialog.value = true
 }
 
 const hideDialog = () => {
-  productDialog.value = false
+  createDialog.value = false
   updateDialog.value = false
   submitted.value = false
 }
 
-const save = () => {
+const createRole = () => {
   submitted.value = true
-  axios.post('api/roles/create', user.value)
-    .then((res) => {
+  axios.post('/api/roles', user.value)
+    .then(() => {
       fetchData()
-      productDialog.value = false
+      createDialog.value = false
       toast.add({
         severity: 'success',
         summary: 'Successful',
-        detail: 'Role Created',
+        detail: 'Role created successfully',
         life: 3000
       })
-      user.value = { name: '', permissions: [] }
     })
-    .catch((error) => {
-      console.error("Error creating role:", error)
+    .catch(error => {
       toast.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'Failed to create role',
+        detail: error.response?.data?.message || 'Failed to create role',
         life: 3000
       })
     })
 }
 
-const edit = (id) => {
-  router.push({ name: 'roles-update', params: { id: id } })
+const editRole = (role) => {
+  user.value = { ...role }
+  updateDialog.value = true
+}
+
+const updateRole = () => {
+  submitted.value = true
+  axios.put(`/api/roles/${user.value.id}`, user.value)
+    .then(() => {
+      fetchData()
+      updateDialog.value = false
+      toast.add({
+        severity: 'success',
+        summary: 'Successful',
+        detail: 'Role updated successfully',
+        life: 3000
+      })
+    })
+    .catch(error => {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.response?.data?.message || 'Failed to update role',
+        life: 3000
+      })
+    })
 }
 
 const confirmDelete = (id) => {
-  delete_id.value = id
-  deleteProductsDialog.value = true
+  deleteId.value = id
+  deleteDialog.value = true
 }
 
-const deleteSelectedProducts = () => {
-  axios.delete(`api/role/${delete_id.value}`)
+const deleteRole = () => {
+  axios.delete(`/api/roles/${deleteId.value}`)
     .then(() => {
       fetchData()
-      deleteProductsDialog.value = false
+      deleteDialog.value = false
       toast.add({
         severity: 'success',
         summary: 'Successful',
-        detail: 'Role Deleted',
+        detail: 'Role deleted successfully',
         life: 3000
       })
     })
-    .catch((error) => {
-      console.error("Error deleting role:", error)
+    .catch(error => {
       toast.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'Failed to delete role',
+        detail: error.response?.data?.message || 'Failed to delete role',
         life: 3000
       })
     })
@@ -187,361 +260,362 @@ onBeforeMount(() => {
 
 onMounted(() => {
   fetchData()
+  fetchPermissions()
+  fetchGovernorates()
 })
 </script>
 
 <template>
   <div class="grid">
     <div class="col-12">
-      <va-card class="card">
+      <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <div class="my-2">
-              <Button
-              v-can="'create roles'"
-                :label='$t("user.new")'
-                icon="pi pi-plus"
-                class="new mr-2"
-                @click="openNew"
-              />
-            </div>
+            <h2 class="text-2xl font-bold">{{ $t("role.manage_roles") }}</h2>
           </template>
 
           <template #end>
-            <div  v-can="'list roles'" class="my-2 flex gap-2">
-              <span class="p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText
-                  v-model="searchQuery"
-                  :placeholder='$t("user.search")'
-                />
-              </span>
+            <div class="flex gap-2">
               <Button
-                :label='$t("user.export")'
-                icon="pi pi-upload"
-                class="new"
-                @click="exportCSV($event)"
+                v-can="'create roles'"
+                :label='$t("role.new_role")'
+                icon="pi pi-plus"
+                class="p-button-success"
+                @click="openNew"
+              />
+              <Button
+                :label='$t("export")'
+                icon="pi pi-download"
+                class="p-button-help"
+                @click="exportCSV"
+                :disabled="!roles || roles.length === 0"
               />
             </div>
           </template>
         </Toolbar>
 
+        <!-- Filter Panel -->
+        <div class="p-fluid p-4 mb-4 surface-100 border-round">
+          <div class="grid">
+            <div class="col-12 md:col-3">
+              <label for="search">{{ $t("search") }}</label>
+              <InputText
+                id="search"
+                v-model="searchQuery"
+                :placeholder='$t("search_placeholder")'
+                class="w-full"
+              />
+            </div>
+
+            <div class="col-12 md:col-3">
+              <label for="governorate">{{ $t("governorate") }}</label>
+              <Dropdown
+                id="governorate"
+                v-model="selectedGovernorate"
+                :options="governorates"
+                optionLabel="name"
+                optionValue="id"
+                :placeholder='$t("select_governorate")'
+                class="w-full"
+                :showClear="true"
+              />
+            </div>
+
+            <div class="col-12 md:col-3">
+              <label for="status">{{ $t("status") }}</label>
+              <Dropdown
+                id="status"
+                v-model="selectedStatus"
+                :options="statuses"
+                optionLabel="name"
+                optionValue="id"
+                :placeholder='$t("select_status")'
+                class="w-full"
+                :showClear="true"
+              />
+            </div>
+
+            <div class="col-12 md:col-3">
+              <label for="dateRange">{{ $t("date_range") }}</label>
+              <Calendar
+                id="dateRange"
+                v-model="dateRange"
+                selectionMode="range"
+                :manualInput="false"
+                dateFormat="yy-mm-dd"
+                :showIcon="true"
+                :showButtonBar="true"
+                class="w-full"
+                :placeholder='$t("select_date_range")'
+              />
+            </div>
+
+            <div class="col-12 flex justify-content-end mt-3">
+              <Button
+                :label='$t("reset_filters")'
+                icon="pi pi-filter-slash"
+                class="p-button-outlined p-button-secondary"
+                @click="resetFilters"
+              />
+            </div>
+          </div>
+        </div>
+
         <Toast />
 
         <DataTable
           ref="dt"
-          v-model:selection="selectedProducts"
+          v-model:selection="selectedRoles"
           :value="roles"
           :loading="loading"
           data-key="id"
-          :paginator="false"
+          :paginator="true"
           :rows="rowsPerPage"
+          :totalRecords="totalRecords"
           :filters="filters"
+          paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          :rows-per-page-options="[5,10,25,50]"
+          current-page-report-template="Showing {first} to {last} of {totalRecords} entries"
           responsive-layout="scroll"
-           v-can="'list roles'"
+          stripedRows
+          showGridlines
+          class="p-datatable-sm"
+          v-can="'list roles'"
+          @page="onPageChange"
         >
-          <template #header>
-            <div class="flex flex-column md:flex-row md:justify-between md:align-items-center">
-              <h5 class="m-0">{{$t("role.manage_Roles")}}</h5>
+          <template #empty>
+            <div class="text-center py-4">
+              <i class="pi pi-exclamation-circle text-2xl mb-2" />
+              <p class="text-xl">No roles found</p>
+            </div>
+          </template>
+
+          <template #loading>
+            <div class="flex justify-content-center align-items-center py-4">
+              <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
             </div>
           </template>
 
           <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
-          <Column
-            field="id"
-            :header='$t("role.iD")'
-            :sortable="true"
-            header-style="width:14%; min-width:5rem;"
-          >
+          <Column field="id" :header='$t("role.id")' :sortable="true" header-style="width:10%; min-width:5rem;">
             <template #body="slotProps">
-              {{ slotProps.data.id }}
+              <span class="font-medium">{{ slotProps.data.id }}</span>
             </template>
           </Column>
 
-          <Column
-            field="name"
-            :header='$t("role.name")'
-            :sortable="true"
-            header-style="width:14%; min-width:10rem;"
-          >
+          <Column field="name" :header='$t("role.name")' :sortable="true" header-style="width:20%; min-width:10rem;">
             <template #body="slotProps">
-              {{ slotProps.data.name }}
+              <span class="font-medium">{{ slotProps.data.name }}</span>
             </template>
           </Column>
 
-          <Column header-style="min-width:17rem;">
+          <Column field="permissions_count" :header='$t("role.permissions")' :sortable="true" header-style="width:15%;">
             <template #body="slotProps">
-              <Button
-              v-can="'edit roles'"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-success mr-2"
-                @click="edit(slotProps.data.id)"
-              />
-              <Button
-              v-can="'delete roles'"
-                icon="pi pi-trash"
-                class="delete mt-2"
-                @click="confirmDelete(slotProps.data.id)"
-              />
+              <Tag :value="slotProps.data.permissions_count" severity="info" />
+            </template>
+          </Column>
+
+          <Column field="created_at" :header='$t("created_at")' :sortable="true" header-style="width:15%;">
+            <template #body="slotProps">
+              {{ new Date(slotProps.data.created_at).toLocaleDateString() }}
+            </template>
+          </Column>
+
+          <Column header-style="width:15%; min-width:10rem;" :header='$t("actions")'>
+            <template #body="slotProps">
+              <div class="flex gap-2">
+                <Button
+                  v-can="'edit roles'"
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-success p-button-sm"
+                  @click="editRole(slotProps.data)"
+                  v-tooltip.top="'Edit'"
+                />
+                <Button
+                  v-can="'delete roles'"
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-danger p-button-sm"
+                  @click="confirmDelete(slotProps.data.id)"
+                  v-tooltip.top="'Delete'"
+                />
+              </div>
             </template>
           </Column>
         </DataTable>
 
-        <!-- Custom Pagination -->
-        <div class="p-paginator p-component p-unselectable-text mt-3">
-          <div class="p-paginator-left-content">
-            <span class="p-paginator-current">
-              Showing {{ from }} to {{ to }} of {{ totalRecords }} entries
-            </span>
-          </div>
-          <div class="p-paginator-right-content">
-            <span class="p-paginator-pages">
-              <button
-                class="p-paginator-first p-paginator-element p-link"
-                :disabled="currentPage === 1"
-                @click="goToPage(1)"
-              >
-                <span class="p-paginator-icon pi pi-angle-double-left"></span>
-              </button>
-              <button
-                class="p-paginator-prev p-paginator-element p-link"
-                :disabled="!prevPageUrl"
-                @click="goToPage(currentPage - 1)"
-              >
-                <span class="p-paginator-icon pi pi-angle-left"></span>
-              </button>
-
-              <template v-for="(link, index) in links" :key="index">
-                <button
-                  v-if="link.label && !isNaN(link.label)"
-                  class="p-paginator-page p-paginator-element p-link"
-                  :class="{ 'p-highlight': link.active }"
-                  @click="goToPage(parseInt(link.label))"
-                >
-                  {{ link.label }}
-                </button>
-                <span v-else-if="link.label === '...'" class="p-paginator-dots">...</span>
-              </template>
-
-              <button
-                class="p-paginator-next p-paginator-element p-link"
-                :disabled="!nextPageUrl"
-                @click="goToPage(currentPage + 1)"
-              >
-                <span class="p-paginator-icon pi pi-angle-right"></span>
-              </button>
-              <button
-                class="p-paginator-last p-paginator-element p-link"
-                :disabled="currentPage === totalPages"
-                @click="goToPage(totalPages)"
-              >
-                <span class="p-paginator-icon pi pi-angle-double-right"></span>
-              </button>
-            </span>
-
-            <span class="p-paginator-rpp-options">
-              <Dropdown
-                v-model="rowsPerPage"
-                :options="[5, 10, 20, 30]"
-                @change="changeRowsPerPage"
-                class="ml-2"
-                style="width: 100px"
-              />
-            </span>
-          </div>
-        </div>
-
-        <!-- Delete Confirmation Dialog -->
-        <Dialog
-          v-model:visible="deleteProductsDialog"
-          :style="{ width: '450px' }"
-          header="Confirm"
-          :modal="true"
-        >
-          <div class="flex align-items-center justify-content-center">
-            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-            <span>Are you sure you want to delete this role?</span>
-          </div>
-          <template #footer>
-            <Button
-              label="No"
-              icon="pi pi-times"
-              class="p-button-text"
-              @click="deleteProductsDialog = false"
-            />
-            <Button
-              label="Yes"
-              icon="pi pi-check"
-              class="p-button-text"
-              @click="deleteSelectedProducts"
-            />
-          </template>
-        </Dialog>
-
         <!-- Create Role Dialog -->
-        <Dialog
-          v-model:visible="productDialog"
-          :style="{ width: '450px' }"
-          header="Create Role"
-          :modal="true"
-          class="p-fluid"
-        >
-          <div class="field mb-5">
-            <label for="name">Name</label>
-            <InputText
-              class="mt-3 w-full"
-              id="name"
-              v-model.trim="user.name"
-              required="true"
-              autofocus
-            />
-          </div>
-          <div class="card flex justify-content-center">
-            <MultiSelect
-              v-model="user.permissions"
-              display="chip"
-              option-value="id"
-              :options="users"
-              optionLabel="name"
-              placeholder="Select Permissions"
-              class="w-full md:w-20rem"
-            />
+        <Dialog v-model:visible="createDialog" :style="{ width: '450px' }" :header='$t("role.create_role")' :modal="true">
+          <div class="p-fluid">
+            <div class="field mb-4">
+              <label for="name">{{ $t("role.name") }}</label>
+              <InputText
+                id="name"
+                v-model.trim="user.name"
+                required="true"
+                autofocus
+                :class="{ 'p-invalid': submitted && !user.name }"
+                class="w-full"
+              />
+              <small class="p-error" v-if="submitted && !user.name">Name is required.</small>
+            </div>
+
+            <div class="field">
+              <label>{{ $t("role.permissions") }}</label>
+              <MultiSelect
+                v-model="user.permissions"
+                :options="permissions"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Select Permissions"
+                display="chip"
+                class="w-full"
+              />
+            </div>
           </div>
 
           <template #footer>
             <Button
-              label="Cancel"
+              :label='$t("cancel")'
               icon="pi pi-times"
               class="p-button-text"
               @click="hideDialog"
             />
             <Button
-              label="Save"
+              :label='$t("save")'
               icon="pi pi-check"
               class="p-button-text"
-              @click="save"
+              @click="createRole"
             />
           </template>
         </Dialog>
 
         <!-- Update Role Dialog -->
-        <Dialog
-          v-model:visible="updateDialog"
-          :style="{ width: '450px' }"
-          header="Update Role"
-          :modal="true"
-        >
-          <div class="field mb-5">
-            <label for="name">Name</label>
-            <InputText
-              class="mt-3 w-full"
-              id="name"
-              v-model.trim="user.name"
-              required="true"
-              autofocus
-            />
-          </div>
-          <div class="card flex justify-content-center">
-            <MultiSelect
-              v-model="user.permissions"
-              option-value="id"
-              :options="users"
-              optionLabel="name"
-              placeholder="Select Permissions"
-              class="w-full md:w-20rem"
-            />
+        <Dialog v-model:visible="updateDialog" :style="{ width: '450px' }" :header='$t("role.update_role")' :modal="true">
+          <div class="p-fluid">
+            <div class="field mb-4">
+              <label for="name">{{ $t("role.name") }}</label>
+              <InputText
+                id="name"
+                v-model.trim="user.name"
+                required="true"
+                autofocus
+                :class="{ 'p-invalid': submitted && !user.name }"
+                class="w-full"
+              />
+              <small class="p-error" v-if="submitted && !user.name">Name is required.</small>
+            </div>
+
+            <div class="field">
+              <label>{{ $t("role.permissions") }}</label>
+              <MultiSelect
+                v-model="user.permissions"
+                :options="permissions"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Select Permissions"
+                display="chip"
+                class="w-full"
+              />
+            </div>
           </div>
 
           <template #footer>
             <Button
-              label="Cancel"
+              :label='$t("cancel")'
               icon="pi pi-times"
               class="p-button-text"
               @click="hideDialog"
             />
             <Button
-              label="Update"
+              :label='$t("update")'
               icon="pi pi-check"
               class="p-button-text"
-              @click="update"
+              @click="updateRole"
             />
           </template>
         </Dialog>
-      </va-card>
+
+        <!-- Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header='$t("confirm")' :modal="true">
+          <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
+            <span>{{ $t("role.delete_confirmation") }}</span>
+          </div>
+          <template #footer>
+            <Button
+              :label='$t("no")'
+              icon="pi pi-times"
+              class="p-button-text"
+              @click="deleteDialog = false"
+            />
+            <Button
+              :label='$t("yes")'
+              icon="pi pi-check"
+              class="p-button-text p-button-danger"
+              @click="deleteRole"
+            />
+          </template>
+        </Dialog>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped lang="scss">
-.new {
-  background: #3b82f6;
-  border: none;
-  color: white;
+<style scoped>
+/* Custom styles for better table display */
+:deep(.p-datatable) {
+  font-size: 0.9rem;
 }
 
-.delete {
-  background: #ef4444;
-  border: none;
-  color: white;
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background-color: #f8f9fa;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.2rem;
+  letter-spacing: 0.5px;
 }
 
-.p-paginator {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem;
-  background: #ffffff;
-  border: 1px solid #dee2e6;
-  border-radius: 3px;
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background-color 0.2s;
+}
 
-  .p-paginator-left-content {
-    color: #6c757d;
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: #f0f4f8 !important;
+}
+
+/* Filter panel styles */
+.filter-panel {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 960px) {
+  :deep(.p-datatable) {
+    overflow-x: auto;
+    display: block;
   }
 
-  .p-paginator-right-content {
-    display: flex;
-    align-items: center;
-
-    .p-paginator-pages {
-      display: flex;
-      margin: 0 0.5rem;
-
-      button {
-        text-align: center;
-        min-width: 2.357rem;
-        height: 2.357rem;
-        margin: 0.143rem;
-        border: 0 none;
-        color: #6c757d;
-        background: transparent;
-        border-radius: 50%;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background: #e9ecef;
-        }
-
-        &.p-highlight {
-          color: #ffffff;
-          background: #E28C3F;
-        }
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: default;
-        }
-      }
-    }
-
-    .p-paginator-dots {
-      min-width: 2.357rem;
-      height: 2.357rem;
-      margin: 0.143rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .filter-panel .p-fluid .grid > div {
+    padding-bottom: 1rem;
   }
+}
+
+/* Button spacing */
+.p-button {
+  margin-right: 0.5rem;
+}
+
+/* Multiselect styling */
+:deep(.p-multiselect) {
+  width: 100%;
+}
+
+/* Dialog footer buttons */
+:deep(.p-dialog-footer .p-button) {
+  min-width: 6rem;
 }
 </style>

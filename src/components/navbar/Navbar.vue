@@ -1,5 +1,5 @@
 <template>
-  <va-navbar class=" nave grid lg:flex lg:justify-between shadow-xl" style="color:white !important; direction: ltr !important;" >
+  <va-navbar class=" nave  lg:flex lg:justify-between shadow-xl" style="color:white !important; direction: ltr !important;" >
     <template #left>
       <div class="left">
         <va-icon-menu-collapsed
@@ -11,10 +11,12 @@
         <router-link to="/">
           <vuestic-logo class="logo" />
         </router-link>
+        <LocaleSelect id="local-switcher"></LocaleSelect>
       </div>
     </template>
-    <LocaleSelect id="local-switcher"></LocaleSelect>
+
     <template #right>
+
       <app-navbar-actions class="app-navbar__actions" :user-name="userName" />
     </template>
   </va-navbar>
