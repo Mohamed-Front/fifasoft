@@ -302,6 +302,11 @@ const routes: Array<RouteRecordRaw> = [
             path: 'procedures-manage',
             component: () => import('../pages/admin/settings/procedures-mange/index.vue'),
           },
+          {
+            name: 'system-management',
+            path: 'system-management',
+            component: () => import('../pages/admin/settings/system-manag/index.vue'),
+          },
 
         ],
       },

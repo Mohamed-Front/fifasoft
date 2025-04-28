@@ -2,7 +2,7 @@ export default {
   users: 'المستخدمين',
   Settings: 'الاعدادات',
   roles: 'ادارة ادوار المسـتخدمين',
-  Services: 'ادارة الخدمات',
+  services: 'ادارة الخدمات',
   courses: 'ادارة خدمات عقد الدورات',
   Requests: 'ادارة الطلبات',
   ministers: 'ادارة طلبات الوزراء',
@@ -22,6 +22,8 @@ export default {
   directoraterequests: 'لوحة طلبات مدير المناخ',
   meteorologyrequests: 'لوحة طلبات ادارة الارصاد الجوية',
   monitoringrequests: 'لوحة طلبات قسم ادارة المناخ',
+  management: 'إدارة النظام',
+  reports: 'التقارير',
   user: {
     new: 'جديد',
     users: 'المستخدمين',

@@ -78,7 +78,7 @@ function isItemExpanded(item: INavigationRoute): boolean {
   margin: 5px;
   border-radius: 10px;
   height: 48px;
-  font-size: .8rem;
+  font-size: .9rem;
   font-weight: bold;
   width: 97%;
 }

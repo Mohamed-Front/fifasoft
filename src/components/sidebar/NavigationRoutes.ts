@@ -23,14 +23,16 @@ export default {
     },
     {
       name: 'Service-management',
-      displayName: 'Services',
+      displayName: 'services',
+      show: ['services'],
       meta: {
-        icon: 'settings',
+        icon: 'list',
       },
     },
     {
       name: 'training-courses',
       displayName: 'courses',
+      show: ['courses'],
       meta: {
         icon: 'school',
       },
@@ -38,7 +40,8 @@ export default {
       children: [
         {
           name: 'requests',
-          displayName: 'Requests',
+          displayName: 'requests',
+          show: ['requests'],
           meta: {
             icon: 'request_quote',
           },
@@ -69,8 +72,9 @@ export default {
     {
       name: 'management-meteorology',
       displayName: 'meteorology',
+      show: ['meteorology'],
       meta: {
-        icon: 'cloud',
+        icon: 'flight',
       },
       disabled: true,
       children: [
@@ -100,8 +104,9 @@ export default {
     {
       name: 'weather-warning',
       displayName: 'weather',
+      show: ['weather'],
       meta: {
-        icon: 'warning',
+        icon: 'cloud',
       },
       disabled: true,
       children: [
@@ -124,8 +129,9 @@ export default {
     {
       name: 'climate',
       displayName: 'climate',
+      show: ['climate'],
       meta: {
-        icon: 'wb_sunny',
+        icon: 'thermostat',
       },
       disabled: true,
       children: [
@@ -169,8 +175,9 @@ export default {
     {
       name: 'managing-registration',
       displayName: 'registration',
+      show: ['registration'],
       meta: {
-        icon: 'how_to_reg',
+        icon: 'person_add',
       },
       disabled: true,
       children: [
@@ -193,6 +200,7 @@ export default {
     {
       name: 'users',
       displayName: 'users_management',
+      show: ['users_management'],
       meta: {
         icon: 'people',
       },
@@ -200,6 +208,7 @@ export default {
     {
       name: 'roles',
       displayName: 'roles',
+      show:['roles'],
       meta: {
         icon: 'admin_panel_settings',
       },
@@ -207,13 +216,23 @@ export default {
     {
       name: 'procedures-manage',
       displayName: 'procedures',
+      show:['procedures'],
       meta: {
-        icon: 'list_alt',
+        icon: 'work',
+      },
+    },
+    {
+      name: 'system-management',
+      displayName: 'management',
+      show:['management'],
+      meta: {
+        icon: 'settings',
       },
     },
     {
       name: 'all-reports',
-      displayName: 'Reports',
+      displayName: 'reports',
+      show:['reports'],
       meta: {
         icon: 'assessment',
       },
