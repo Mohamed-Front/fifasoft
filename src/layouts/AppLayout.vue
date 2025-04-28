@@ -1,6 +1,8 @@
 <template>
   <div class="app-layout">
-    <navbar />
+    <div class="app-layout__navbar-wrapper">
+      <navbar />
+    </div>
     <div class="app-layout__content">
       <div class="app-layout__sidebar-wrapper" :class="{ minimized: isSidebarMinimized }">
         <div v-if="isFullScreenSidebar" class="flex justify-end">
@@ -87,14 +89,19 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    &__navbar {
+
+    &__navbar-wrapper {
+      width: 100%;
       min-height: 4rem;
+      position: relative;
+      z-index: 2;
     }
 
     &__content {
       display: flex;
       height: calc(100vh - 4rem);
       flex: 1;
+      position: relative;
 
       @media screen and (max-width: $tabletBreakPointPX) {
         height: calc(100vh - 6.5rem);
@@ -104,28 +111,31 @@
         position: relative;
         height: 100%;
         background: #ffffff;
+        z-index: 1;
 
         @media screen and (max-width: $tabletBreakPointPX) {
           &:not(.minimized) {
             width: 100%;
             height: 100%;
             position: fixed;
-            top: 0;
-            z-index: 999;
+            top: 4rem; /* Start below navbar */
+            z-index: 1;
           }
 
           .va-sidebar:not(.va-sidebar--minimized) {
             .va-sidebar__menu {
               padding: 0;
-
             }
           }
         }
       }
     }
+
     &__page {
       flex-grow: 2;
       overflow-y: scroll;
+      width: 100%;
+      height: 100%;
     }
   }
 </style>

@@ -40,8 +40,7 @@ export default {
       children: [
         {
           name: 'requests',
-          displayName: 'requests',
-          show: ['requests'],
+          displayName: 'Requests',
           meta: {
             icon: 'request_quote',
           },
@@ -61,7 +60,7 @@ export default {
           },
         },
         {
-          name: 'reports',
+          name: 'training-reports',
           displayName: 'Reports',
           meta: {
             icon: 'assessment',
