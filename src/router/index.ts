@@ -105,8 +105,8 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
-        name: 'Service-management',
-        path: 'Service-management',
+        name: 'Service-managements',
+        path: 'Service-managements',
         // component: RouteViewComponent,
         children: [
           {
@@ -114,7 +114,11 @@ const routes: Array<RouteRecordRaw> = [
             path: 'Service-management',
             component: () => import('../pages/admin/Service-management/index.vue')
           },
-
+          {
+            name: 'Service-edit',
+            path: 'Service-edit/:id',
+            component: () => import('../pages/admin/Service-management/edit.vue')
+          },
 
         ],
       },
@@ -163,13 +167,13 @@ const routes: Array<RouteRecordRaw> = [
         // component: RouteViewComponent,
         children: [
           {
-            name: 'reports',
-            path: 'reports',
+            name: 'training-reports',
+            path: 'training-reports',
             component: () => import('../pages/admin/training-courses/reports.vue'),
           },
           {
-            name: 'requests',
-            path: 'requests',
+            name: 'training-requests',
+            path: 'training-requests',
             component: () => import('../pages/admin/training-courses/requests-board.vue'),
           },
           {

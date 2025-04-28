@@ -295,6 +295,7 @@ const getStatusSeverity = (status) => {
                     :options="governorates"
                     optionLabel="name"
                     placeholder="اختر المحافظة"
+                    filter
                     class="w-15rem"
                   />
                   <Dropdown

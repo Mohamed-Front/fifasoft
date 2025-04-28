@@ -37,7 +37,7 @@ export default {
       disabled: true,
       children: [
         {
-          name: 'requests',
+          name: 'training-requests',
           displayName: 'Requests',
           meta: {
             icon: 'request_quote',
@@ -58,7 +58,7 @@ export default {
           },
         },
         {
-          name: 'reports',
+          name: 'training-reports',
           displayName: 'Reports',
           meta: {
             icon: 'assessment',

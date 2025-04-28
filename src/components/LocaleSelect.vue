@@ -24,6 +24,7 @@ const changeLocale = () => {
   i18n.global.locale.value = newLang.code;
   appLang.setAppLang(newLang.code);
   appLang.setAppRtl(newLang.dir === 'rtl');
+  window.location.reload()
 };
 </script>
 
