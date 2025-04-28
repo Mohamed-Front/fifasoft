@@ -1,6 +1,6 @@
 <template>
-  <va-sidebar :width="width" :minimized="minimized" :minimized-width="minimizedWidth" :animated="animated">
-    <menu-minimized v-if="minimized" :items="items"/>
+  <va-sidebar :minimized="minimized" :minimized-width="minimizedWidth" :animated="animated">
+    <menu-minimized v-if="minimized" :items="items" />
     <menu-accordion v-else :items="items"/>
   </va-sidebar>
 </template>
@@ -20,7 +20,6 @@ withDefaults(
     minimizedWidth?: string
   }>(),
   {
-    width: '16rem',
     color: 'secondary',
     animated: true,
     minimized: true,
@@ -50,11 +49,11 @@ const items = ref(NavigationRoutes.routes)
 }
 
 .router-link-active {
-  background-color: #cfc8c8!important;
+  background-color: #f5f5f5!important;
  border-color:  #f5f5f5 !important;
 }
 .va-sidebar__item:hover {
-  background-color: #ebe4e4 !important;
+  background-color: #dfdfdf !important;
 }
 
 

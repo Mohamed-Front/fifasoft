@@ -5,6 +5,12 @@
 @import 'vuestic-sass/index';
 @import 'icon-fonts/index';
 
+:root {
+  --mainColor : #f5f5f5;
+  --bgColor : #fafafa;
+  --sideColor : #1976d2;
+  --hoverColor : #e2e2e2;
+}
 html {
   line-height: 1.15;
 }
@@ -13,6 +19,7 @@ html {
 }
 
 body {
+  background-color: var(--bgColor);
   line-height: 1;
   font-family: "Cairo", sans-serif;
 }
@@ -140,4 +147,10 @@ td{
 }
 canvas{
   height: 550px !important;
+}
+.app-layout__sidebar-wrapper {
+  width: 350px !important;
+}
+.va-sidebar{
+  width: 100%;
 }

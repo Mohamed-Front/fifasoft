@@ -31,10 +31,10 @@ export default {
      create_User:"Create User",
      edit_User:"Edit  User",
      update_User:"Update User",
-    
+
   },
   role:{
-    
+
     manage_Roles:"Manage Roles",
     iD:"ID",
     name:"Name",
@@ -57,6 +57,8 @@ export default {
   //   "roleData": "Loading role data...",
   //   "permissions": "Loading permissions..."
   // },
-  
 
+  pages: {
+    Home: 'Home Page',
+  },
 };

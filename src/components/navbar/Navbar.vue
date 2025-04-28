@@ -1,100 +1,44 @@
 <template>
-  <va-navbar class=" nave  lg:flex lg:justify-between shadow-xl" style="color:white !important; direction: ltr !important;" >
-    <template #left>
-      <div class="left">
-        <va-icon-menu-collapsed
-          :class="{ 'x-flip': isSidebarMinimized }"
-          class="va-navbar__item"
-          :color="colors.primary"
-          @click="isSidebarMinimized = !isSidebarMinimized"
-        />
-        <router-link to="/">
-          <vuestic-logo class="logo" />
-        </router-link>
-        <LocaleSelect id="local-switcher"></LocaleSelect>
+  <nav class="bg-[var(--mainColor)] h-[66px] flex justify-between items-center p-6">
+    <div class="flex justify-start items-center gap-4">
+      <i class="pi pi-align-justify it before:font-bold menu"></i>
+      <h1 class="text-[var(--sideColor)] text-[1.2rem] font-bold">{{ t('pages.Home') }}</h1>
+    </div>
+    <div class="flex justify-evenly items-center gap-2">
+      <div>
+        <LocaleSelect id="local-switcher" class="lang"></LocaleSelect>
       </div>
-    </template>
-
-    <template #right>
-
-      <app-navbar-actions class="app-navbar__actions" :user-name="userName" />
-    </template>
-  </va-navbar>
+      <div><i class="pi pi-moon text-[var(--sideColor)] meni"></i></div>
+      <div><i class="pi pi-sign-out text-[var(--sideColor)] meni"></i></div>
+    </div>
+  </nav>
 </template>
 
 <script setup>
-  import { computed } from 'vue'
-  import { storeToRefs } from 'pinia'
-  import { useGlobalStore } from '../../stores/global-store'
-  import { useI18n } from 'vue-i18n'
-  import { useColors } from 'vuestic-ui'
-  import VuesticLogo from '../VuesticLogo.vue'
-  import VaIconMenuCollapsed from '../icons/VaIconMenuCollapsed.vue'
-  import AppNavbarActions from './components/AppNavbarActions.vue'
-  import LocaleSelect from '../LocaleSelect.vue'
+import { ref } from 'vue';
+import LocaleSelect from '../LocaleSelect.vue';
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
-  const GlobalStore = useGlobalStore()
-  const { t } = useI18n()
-
-  const { isSidebarMinimized, userName } = storeToRefs(GlobalStore)
-
-  const { getColors } = useColors()
-  const colors = computed(() => getColors())
 </script>
 
-<style lang="scss" scoped>
+<style>
+.pi {
+  font-size: clamp(1rem, 2.5vh, 3rem) !important;
+}
 
-  .va-navbar {
-    box-shadow: var(--va-box-shadow);
-    z-index: 2;
-
-    background-color:#fbfbfb !important;
-
-    @media screen and (max-width: 950px) {
-      .left {
-        width: 100%;
-      }
-
-      .app-navbar__actions {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-      }
-    }
-  }
-
-  .left {
-    display: flex;
-    align-items: center;
-
-    & > * {
-      margin-right: 1.5rem;
-    }
-
-    & > *:last-child {
-      margin-right: 0;
-    }
-  }
-
-  .x-flip {
-    transform: scaleX(-100%);
-  }
-
-  .app-navbar-center {
-    display: flex;
-    align-items: center;
-    height: 1rem;
-
-    @media screen and (max-width: 1200px) {
-      &__github-button {
-        display: none;
-      }
-    }
-
-    @media screen and (max-width: 950px) {
-      &__text {
-        display: none;
-      }
-    }
-  }
+.lang {
+  padding: 0 !important;
+}
+i {
+padding: 10px;
+border-radius: 50%;
+transition: all .5s;
+}
+.menu:hover {
+  background-color: var(--hoverColor);
+}
+.meni:hover {
+  background-color: #1976d21e;
+}
 </style>
