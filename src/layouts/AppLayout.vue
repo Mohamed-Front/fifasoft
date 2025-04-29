@@ -15,8 +15,8 @@
           :animated="!isMobile"
         />
       </div>
-      <div class="app-layout__page">
-        <div class="p-2 md:px-6 md:py-9">
+      <div class="app-layout__page p-0">
+        <div class="md:px-6 md:py-9">
           <router-view />
         </div>
       </div>

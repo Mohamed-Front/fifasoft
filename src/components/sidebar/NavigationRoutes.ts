@@ -18,7 +18,7 @@ export default {
       displayName: 'dashboard',
       show: ['dashboard'],
       meta: {
-        icon: 'vuestic-iconset-dashboard',
+        icon: 'dashboard',
       },
     },
     {
@@ -127,8 +127,8 @@ export default {
     },
     {
       name: 'climate',
-      displayName: 'climate',
-      show: ['climate'],
+      displayName: 'climatee',
+      show: ['climatee'],
       meta: {
         icon: 'thermostat',
       },

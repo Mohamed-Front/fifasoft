@@ -1,8 +1,8 @@
 <template>
-  <nav class="bg-[var(--mainColor)] h-[66px] flex justify-between items-center p-6">
+  <nav class="bg-[var(--bgColor)] h-[66px] flex justify-between items-center p-6">
     <div class="flex justify-start items-center gap-4">
-      <i class="pi pi-align-justify it before:font-bold menu"></i>
-      <button @click="goBack" class="text-[var(--sideColor)] hover:bg-[var(--hoverColor)] p-2 rounded transition-all">
+      <i class="pi pi-align-justify it before:font-bold menu" :class="darkMode ? 'text-white' : 'text-[#000]'" v-if="page != 'login'"></i>
+      <button @click="goBack" class="text-[var(--sideColor)] hover:bg-[var(--hoverColor)] p-2 rounded transition-all" v-if="page != 'login'">
         <i class="pi pi-arrow-left"></i>
       </button>
       <h1 class="text-[var(--sideColor)] text-[1.2rem] font-bold">{{ t('pages.Home') }}</h1>
@@ -12,12 +12,9 @@
         <LocaleSelect id="local-switcher" class="lang"></LocaleSelect>
       </div>
       <div @click="toggleDarkMode">
-        <i
-          class="pi text-[var(--sideColor)] meni"
-          :class="darkMode ? 'pi-sun' : 'pi-moon'"
-        ></i>
+        <i class="pi text-[var(--sideColor)] meni" :class="darkMode ? 'pi-sun' : 'pi-moon'"></i>
       </div>
-      <div @click="logout"><i class="pi pi-sign-out text-[var(--sideColor)] meni"></i></div>
+      <div @click="logout" v-if="page != 'login'"><i class="pi pi-sign-out text-[var(--sideColor)] meni"></i></div>
     </div>
   </nav>
 </template>
@@ -28,11 +25,14 @@ import LocaleSelect from '../LocaleSelect.vue';
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/Auth'
+import { body } from 'ionicons/icons';
+import { darkMode } from '../them.js';
 const authStore = useAuthStore()
-
 const { t } = useI18n()
 const router = useRouter()
-const darkMode = ref(false);
+defineProps({
+  page: String
+})
 
 // Check for saved user preference or system preference
 onMounted(() => {
@@ -55,8 +55,14 @@ const toggleDarkMode = () => {
 const applyDarkMode = () => {
   if (darkMode.value) {
     document.documentElement.classList.add('dark');
+    document.querySelectorAll('body').forEach((el) => {
+      el.classList.add('dark')
+    })
   } else {
     document.documentElement.classList.remove('dark');
+    document.querySelectorAll('body').forEach((el) => {
+      el.classList.remove('dark')
+    })
   }
 };
 
@@ -75,12 +81,13 @@ const logout = () => {
       authStore.resetAuthStore()
       router.push({ name: 'login' })
     })
-    .catch(() => {})
+    .catch(() => { })
 }
 
 const goBack = () => {
   router.go(-1)
 };
+
 </script>
 
 <style>
@@ -91,27 +98,32 @@ const goBack = () => {
 .lang {
   padding: 0 !important;
 }
+
 i {
   padding: 10px;
   border-radius: 50%;
   transition: all .5s;
 }
+
 .menu:hover {
   background-color: var(--hoverColor);
 }
+
 .meni:hover {
   background-color: #1976d21e;
 }
 
 /* Dark mode styles */
 .dark {
-  --mainColor: #1a1a1a;
-  --sideColor: #f0f0f0;
-  --hoverColor: #333333;
+  --mainColor: #121212;
+  --bgColor: #1d1d1d;
+  --hoverColor: #3d4550;
+  --textColor: #fff;
+  --textColor2: #e0e0e0;
+  --sidemanu: #1d2734;
 }
 
 .dark body {
   background-color: #121212;
-  color: #f0f0f0;
 }
 </style>

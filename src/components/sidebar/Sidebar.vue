@@ -34,7 +34,7 @@ const items = ref(NavigationRoutes.routes)
 .va-sidebar {
   &__menu {
     padding: 2rem 0;
-    background-color: #f5f5f5;
+    background-color: var(--mainColor);
   }
 
   &-item {
@@ -49,11 +49,11 @@ const items = ref(NavigationRoutes.routes)
 }
 
 .router-link-active {
-  background-color: #f5f5f5!important;
- border-color:  #f5f5f5 !important;
+  background-color: var(--hoverColor) !important;
+  border-color: var(--hoverColor) !important;
 }
 .va-sidebar__item:hover {
-  background-color: #dfdfdf !important;
+  background-color: var(--hoverColor) !important;
 }
 
 

@@ -238,6 +238,8 @@ const getStatusSeverity = (status) => {
     default: return 'success'; // Completed
   }
 };
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 </script>
 
 <template>
@@ -246,13 +248,13 @@ const getStatusSeverity = (status) => {
       <div class="card p-4 shadow-2 border-round">
         <Toolbar class="mb-4">
           <template #start>
-            <h2 class="text-2xl font-bold">طلبات البيانات المناخية</h2>
+            <h2 class="text-2xl font-bold">{{ $t('climate.manage_requests') }}</h2>
           </template>
 
           <template #end>
             <div class="flex gap-2">
-              <Button :label="'طباعة'" icon="pi pi-print" class="p-button-help no-print" :loading="printLoading" @click="printTable" />
-              <Button :label="'تصدير'" icon="pi pi-download" class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
+              <Button :label="$t('climate.print')" icon="pi pi-print" class="p-button-help no-print" :loading="printLoading" @click="printTable" />
+              <Button :label="$t('climate.export')" icon="pi pi-download" class="p-button-info no-print" :loading="exportLoading" @click="exportCSV" />
             </div>
           </template>
         </Toolbar>
@@ -284,7 +286,7 @@ const getStatusSeverity = (status) => {
                 <div class="flex gap-2">
                   <span class="p-input-icon-left">
                     <i class="pi pi-search" />
-                    <InputText v-model="searchQuery" placeholder="ابحث..." class="w-full" />
+                    <InputText v-model="searchQuery" :placeholder="$t('climate.search')" class="w-full" />
                   </span>
                   <Button icon="pi pi-refresh" class="p-button-text" @click="fetchData" v-tooltip.top="'Refresh data'" />
                 </div>
@@ -294,7 +296,7 @@ const getStatusSeverity = (status) => {
                     v-model="selectedGovernorate"
                     :options="governorates"
                     optionLabel="name"
-                    placeholder="اختر المحافظة"
+                    :placeholder="$t('climate.select_the_governorate')"
                     filter
                     class="w-15rem"
                   />
@@ -307,18 +309,18 @@ const getStatusSeverity = (status) => {
                       { label: 'مكتمل', value: 1 },
                     ]"
                     optionLabel="label"
-                    placeholder="اختر الحالة"
+                    :placeholder="$t('climate.Select_Status')"
                     class="w-15rem"
                   />
                   <Calendar
                     v-model="fromDate"
-                    placeholder="من تاريخ"
+                    :placeholder="$t('climate.from_Date')"
                     dateFormat="yy-mm-dd"
                     class="w-10rem"
                   />
                   <Calendar
                     v-model="toDate"
-                    placeholder="إلى تاريخ"
+                   :placeholder="$t('climate.to_Date')"
                     dateFormat="yy-mm-dd"
                     class="w-10rem"
                   />
@@ -328,37 +330,37 @@ const getStatusSeverity = (status) => {
 
             <Column selection-mode="multiple" header-style="width: 3rem"></Column>
 
-            <Column field="createdDate" header="تاريخ الطلب" :sortable="true">
+            <Column field="createdDate" :header="$t('climate.Request_Date')" :sortable="true">
               <template #body="slotProps">
                 {{ new Date(slotProps.data.createdDate).toLocaleDateString() }}
               </template>
             </Column>
 
-            <Column field="fullName" header="اسم مقدم الطلب" :sortable="true">
+            <Column field="fullName" :header="$t('climate.Applicant')" :sortable="true">
               <template #body="slotProps">
                 <span class="font-medium">{{ slotProps.data.fullName }}</span>
               </template>
             </Column>
 
-            <Column field="goalOfClimateInfoName" header="الغرض من البيانات" :sortable="true">
+            <Column field="goalOfClimateInfoName" :header="$t('climate.Purpose_of_the_Data')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.goalOfClimateInfoName }}
               </template>
             </Column>
 
-            <Column field="governorateName" header="المحافظة" :sortable="true">
+            <Column field="governorateName" :header="$t('climate.Governorate')" :sortable="true">
               <template #body="slotProps">
                 {{ slotProps.data.governorateName }}
               </template>
             </Column>
 
-            <Column field="requestStatusName" header="حالة الطلب" :sortable="true">
+            <Column field="requestStatusName" :header="$t('climate.Request_Status')" :sortable="true">
               <template #body="slotProps">
                 <Tag :value="slotProps.data.requestStatusName" :severity="getStatusSeverity(slotProps.data.requestStatus)" />
               </template>
             </Column>
 
-            <Column header="الإجراءات">
+            <Column :header="$t('climate.Actions')">
               <template #body="slotProps">
                 <Button
                   icon="pi pi-eye"
@@ -371,7 +373,7 @@ const getStatusSeverity = (status) => {
             <template #empty>
               <div class="text-center py-4">
                 <i class="pi pi-exclamation-circle text-2xl mb-2" />
-                <p class="text-xl">لا توجد بيانات</p>
+                <p class="text-xl">{{ $t('climate.No_data') }}</p>
               </div>
             </template>
 
@@ -386,11 +388,11 @@ const getStatusSeverity = (status) => {
         <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" :header="'تأكيد'" :modal="true">
           <div class="flex align-items-center justify-content-center">
             <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem; color: var(--red-500)" />
-            <span>هل أنت متأكد أنك تريد حذف هذا الطلب؟</span>
+            <span>{{ $t('climate.delete_request') }}</span>
           </div>
           <template #footer>
-            <Button :label="'لا'" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
-            <Button :label="'نعم'" icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteRequest" />
+            <Button :label="$t('climate.no')" icon="pi pi-times" class="p-button-text" @click="deleteDialog = false" />
+            <Button :label="$t('climate.yes')" icon="pi pi-check" class="p-button-text p-button-danger" @click="deleteRequest" />
           </template>
         </Dialog>
       </div>
