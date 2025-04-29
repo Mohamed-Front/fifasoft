@@ -39,7 +39,7 @@ export default {
       disabled: true,
       children: [
         {
-          name: 'requests',
+          name: 'training-request',
           displayName: 'Requests',
           meta: {
             icon: 'request_quote',
